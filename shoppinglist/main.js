@@ -17,6 +17,10 @@ app.on('ready', function(){
     // Create new window
     mainWindow = new BrowserWindow({});
     // Load html into window
-    mainWindow.loadURL(url.format('mainWindow.html'));
+    mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'mainWindow.html'),
+        protocol: 'file',
+        slashes: true
+    })); // load url
 
 }); // app ready

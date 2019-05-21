@@ -16,7 +16,11 @@ let addWindow;
 // Listen for the app to be ready
 app.on('ready', function(){
     // Create new window
-    mainWindow = new BrowserWindow({});
+    mainWindow = new BrowserWindow({
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
     // Load html into window
     mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, 'mainWindow.html'),
@@ -40,6 +44,9 @@ app.on('ready', function(){
 function createAddWindow(){
     // Create new window
     addWindow = new BrowserWindow({
+        webPreferences: {
+            nodeIntegration: true
+        },
         width: 300,
         height: 200,
         title: 'Add Shopping List Item'
@@ -55,6 +62,13 @@ function createAddWindow(){
         addWindow = null;
     }); // on closed
 }
+
+// Catch item:add
+ipcMain.on('item:add', function(e, item){
+    console.log(item);
+    mainWindow.webContents.send('item:add', item);
+    addWindow.close();
+}); // catch item:add
 
 // Create menu template
 const mainMenuTemplate = [
@@ -105,7 +119,7 @@ if(process.env.NODE_ENV !== 'production'){
                 click(item, focusedWindow){
                     focusedWindow.toggleDevTools();
                 }
-            },
+            },  
             {
                 role: 'reload'
             }

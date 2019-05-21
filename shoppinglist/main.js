@@ -5,10 +5,10 @@
 // Following Tuturial by Traversy
 
 const electron = require('electron');
-const url = require('url');
 const path = require('path');
+const url = require('url');
 
-const {app, BrowserWindow} = electron;
+const {app, BrowserWindow, Menu, ipcMain} = electron;
 
 let mainWindow;
 
@@ -22,21 +22,33 @@ app.on('ready', function(){
         protocol: 'file',
         slashes: true
     })); // load url
+
+    // Build menu from template
+    const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
+    // Insert menu
+    Menu.setApplicationMenu(mainMenu);
+
 }); // app ready
+
 
 // Create menu template
 const mainMenuTemplate = [
     {
-        label:'File',
-        contents: {
+        label: 'File',
+        submenu: [
+            {
+                label: 'Add Item'
+            },
+            {
+                label: 'Clear Items'
+            },
+            {
+                label: 'Quit',
+                click(){
+                    app.quit();
+                }
+            }
 
-        }
-
-    },
-    {
-        label: 'Edit',
-        contents: {
-            
-        }
+        ]
     }
 ];

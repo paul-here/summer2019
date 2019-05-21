@@ -22,5 +22,21 @@ app.on('ready', function(){
         protocol: 'file',
         slashes: true
     })); // load url
-
 }); // app ready
+
+// Create menu template
+const mainMenuTemplate = [
+    {
+        label:'File',
+        contents: {
+
+        }
+
+    },
+    {
+        label: 'Edit',
+        contents: {
+            
+        }
+    }
+];

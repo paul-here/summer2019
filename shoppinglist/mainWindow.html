@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>ShoppingList</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 </head>
 <body>
-    <h1>Shopping List</h1>
+    <nav>
+        <div class="nav-wrapper">
+            <a class="brand-logo center">ShoppingList</a>
+        </div>
+    </nav>
+
     <ul></ul>
 
-
-    
     <script>
         const electron = require('electron');
         const {ipcRenderer} = electron;
@@ -21,11 +25,14 @@
             const itemText = document.createTextNode(item);
             li.appendChild(itemText);
             ul.appendChild(li);
+            ul.className = 'collection';
+            li.className = 'collection-item';
         });
 
         // clear items
         ipcRenderer.on('item:clear', function(){
             ul.innerHTML = '';
+            ul.className = '';
         });
 
         // remove item
@@ -33,6 +40,9 @@
 
         function removeItem(e){
             e.target.remove();
+            if(ul.children.length == 0){
+                ul.className = '';
+            }
         }
 
 

@@ -1,0 +1,16 @@
+{
+  "name": "desktoplightcalc",
+  "version": "1.0.0",
+  "description": "PAR/PPF/DLI Calculator",
+  "main": "main.js",
+  "dependencies": {
+    "electron": "^5.0.2",
+    "jquery": "^3.4.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Paul Whipp",
+  "license": "MIT"
+}

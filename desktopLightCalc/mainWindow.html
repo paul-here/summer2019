@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<!--
+Copyright (c) 2016 Ed Martin <edman007@edman007.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+  <head>
+    <meta charset="UTF-8"/>
+    <title>PAR/PPF/DLI Calculator</title>
+    <!-- 
+        import main.js? 
+        import jquery? (or keep it vanilla?)
+        remove par-calc.js?
+    -->
+    <script type="text/javascript" src="par-calc.js"></script>
+    <link rel="stylesheet" type="text/css" href="par-calc.css"/>
+  </head>
+  
+  <body onload="initCalc()">
+    <h1>Photosynthetically active radiation (PAR), Lumen, and Radiant Flux conversion Calculator</h1>
+    <form action="#">
+      <div class="note">
+        This calculates lighting as it is relevant between plants and humans using actual spectrum curves. This should be accurate for LED based grow lights as well as any other type of lighting as long as the spectrum is known. The lumen and PAR dependent numbers are calculated based on actual studies that measured the real world curves. The PAR curve is from <a href="http://www.inda-gro.com/IG/sites/default/files/pdf/ACTION-SPECTRUM-KJMCCREE.pdf">Institute of Life Science and Biology Department, Texas A and M University, College Station,
+Texas (U.S.A.)</a>, the lumen curve is from <a href="http://www.cvrl.org/cones.htm"> Stockman & Sharpe cone fundamentals</a>
+      </div>
+    <h1>Light Properties</h1>
+    <div id="light_bulb">
+      <div class="note">
+        Note: In this calculator radiant flux is calculated only over displayed wavelengths of 375-800nm. The Black Body Spectrum input clips the spectrum to be within 400-700nm. When using the black body spectrums the radiant flux is measured only over the 400-700nm range.<br/><br/>
+        Radiant Flux is a measure of actual light output, and here it is a measure of actual light output over the given spectrum. When entering radiant flux, a rough estimate is .
+      </div>
+        Intensity: <input type="text" name="intensity" id="intensity" onchange="updateInput()" value="250" />
+        <select id="iten_units" name="iten_units" onchange="updateInput()">
+          <option value="lumen">Lumens</option>
+          <option value="ppf">PPF (μmol/s)</option>
+          <option value="watt">Watts (of light)</option>
+        </select>
+        <br/>
+        Spectrum:
+        <input type="text" id="light_spectrum" name="light_spectrum" onchange="updateInput()" value="4000" />
+        <select id="light_spectrum_units" name="light_spectrum_units" onchange="updateInput()">
+          <option value="bb">Color Tempreture (Ideal Black body tempreture)</option>
+          <option value="nm">Single/Custom Wavelength (in nm)</option>
+        </select><br/>
+        <div class="note">
+          Black Body Spectrum is in degrees kelvin, assumes the light source is an ideal black body radiator clipped to 400-700nm<br/>
+          Single/Custom Wavelength accepts a comma deliminated list of wavelengths in nm and relative weights. Example &quot;500&quot; means a single monochromatic light at 500nm, &quot;500, 400, 700&quot; means a light source with power equally distrubuted through the three wavelengths, 400nm, 500nm, and 700nm. &quot;400:2, 700:1&quot; means 2/3 of the power is at 400nm and 1/3 of the power is at 700nm.
+        </div>
+        <canvas id="input_canvas" width="1500" height="500"></canvas>
+    </div>
+    <h1>Fixture Properties</h1>
+    <div id="fixture">
+      Fixture style: <select name="fix_style" id="fix_style">
+        <option value="circ">Circular/Spherical (incadecent, CFL, anything that fits in a standard light socket)</option>
+        <option value="rect">Rectangular (Standard florcents, aquarium lights, strip lighting)</option>
+      </select>
+      <br />
+      Beam width: <input type="text" name="beam_width" id="beam_width" value="30" onchange="updateInput()"/> degrees (beam width is the angle between that the light spreads out from the fixture, a bulb without a fixture will usually be 360 degrees, it is also know as the <a href="http://blog.1000bulbs.com/beam-angle-explained/">beam angle</a>)<br />
+      Height: <input type="text" name="fix_height" id="fix_height" value="1" onchange="updateInput()"/>
+      <select name="height_unit" id="height_unit" onchange="updateInput()">
+         <option value="m">Meters</option>
+        <option value="cm">Centimeters</option>
+        <option value="in">Inches</option>
+        <option value="ft">Feet</option>
+      </select> (Height is measured from the filament or the point behind the bulb where the beam converges to a point for LEDs)
+      <br />
+      Length: <input type="text" name="fix_len" id="fix_len" value="1" onchange="updateInput()"/>
+      <select name="len_unit" id="len_unit" onchange="updateInput()">
+        <option value="m">Meters</option>
+        <option value="cm">Centimeters</option>
+        <option value="in">Inches</option>
+        <option value="ft">Feet</option>
+      </select> (Only applies to rectangular fixtures)
+    </div>
+    <h1>Timer Properties</h1>
+    <div id="timer">
+      Hours on per day (photoperiod): <input type="text" id="photoperiod" name="photoperiod" onchange="updateInput()" value="8" /> Hours      
+    </div>
+
+    <h1>Outputs</h1>
+    <div id="output">
+      Area Illuminated by light at the given distance: <span id="lit_area"></span><br />
+
+      <h2>Total Light output:</h2><br />
+      Radiant Flux: <input type="text" name="out_flux" id="out_flux" onchange="updatePower(this, 'flux');" /> W<br />
+      PPF: <input type="text" name="out_ppf" id="out_ppf" onchange="updatePower(this, 'ppf');" /> μmol/s<br />
+      PAR Watts: <input type="text" name="out_par" id="out_par" onchange="updatePower(this, 'par');" /> W<br />
+      Lumens: <input type="text" name="out_lm" id="out_lm" onchange="updatePower(this, 'lm');" /> lm<br />
+      <br />
+      <h2>Intensity at distance</h2></br>
+      Radiant Flux Density: <input type="text" name="out_flux_den" id="out_flux_den" onchange="updatePower(this, 'flux_den');" /> W/m^2<br />
+      PPFD: <input type="text" name="out_ppfd" id="out_ppfd" onchange="updatePower(this, 'ppfd');" /> μmol/s*m^2<br />
+      PAR Irradiance: <input type="text" name="out_pari" id="out_pari" onchange="updatePower(this, 'pari');" /> W/m^2<br />
+      Lux: <input type="text" name="out_lux" id="out_lux" onchange="updatePower(this, 'lux');" /> lux<br />
+      Daily Light Integral (DLI) <input type="text" name="out_dli" id="out_dli" onchange="updatePower(this, 'dli');" /> mol/day
+      <div class="note">Proper lighting for a plant is primarly determined by the DLI, with seasonal variation acheived through varying the photoperiod. The DLI requirements for select plants can be found in <a href="https://www.extension.purdue.edu/extmedia/ho/ho-238-w.pdf">this study Measuring Daily Light Integral in a Greenhouse</a>. 5mol/day is acceptable for some plants, most will grow well with 10mol/day, and pratically all high light plants will find 20+mol/day excellent</div>
+      
+      
+    </div>
+    
+    </form>
+  </body>
+
+</html>
